@@ -95,6 +95,9 @@ sealed class List<out A> {
 
         fun <A> concatViaFoldLeft(list1: List<A>, list2: List<A>): List<A> =
             list1.reverse().foldLeft(list2) { x -> x::cons }
+
+        fun<A> flatten (list:List<List<A>>): List<A> =
+            list.foldRight(Nil){x->x::concat}
     }
 }
 
@@ -144,5 +147,8 @@ fun main() {
 
     println(List.concatViaFoldRight(List(1,2,3,4,5),List(1,2,3,4,5)))
     println(List.concatViaFoldLeft(List(1,2,3,4,5),List(1,2,3,4,5)))
-
+    val list1=List(1,2,3)
+    val list2=List(1,2,3)
+    val list3=List(1,2,3)
+    println(List.flatten(List(list1,list2,list3)))
 }
