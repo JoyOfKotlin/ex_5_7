@@ -28,6 +28,8 @@ sealed class List<out A> {
     fun reverse (): List<A> =
         reverse(List.invoke(),this)
 
+    fun reverseLeft() : List<A> =foldLeft(Nil as List<A>,{acc->{acc.cons(it)}})
+
     fun init(): List<A> = reverse().drop(1).reverse()
 
     fun <B> foldRight(identity : B, f: (A,B)->B): B =  foldRight(this, identity,f)
@@ -108,6 +110,8 @@ fun productRight(list : List<Int>)  : Int =  list.foldRight(1,){ x, y -> x * y }
 fun sumLeft(list: List<Int>) : Int =list.foldLeft(0,{x->{y->x+y}})
 fun productLeft(list : List<Int>) : Int = list.foldLeft(1,{x->{y->x*y}})
 
+fun <A> reverseLeft(list : List<A>) : List<A> =list.foldLeft(List.Nil as List<A>,{ acc->{acc.cons(it)}})
+
 
 fun main() {
     val test_list=List(1,2,3,4,5,6,7,8,9,10)
@@ -125,6 +129,8 @@ fun main() {
     println(productLeft(test_list))
     println(test_list.lengthLeft())
     println("\n")
+
+    println(reverseLeft(test_list))
 
 
 }
