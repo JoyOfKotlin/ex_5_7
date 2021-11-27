@@ -30,10 +30,11 @@ sealed class List<out A> {
 
     fun init(): List<A> = reverse().drop(1).reverse()
 
-    fun <B> foldRight(identity : B, f: (A,B)->B): B =
-        foldRight(this, identity,f)
+    fun <B> foldRight(identity : B, f: (A,B)->B): B =  foldRight(this, identity,f)
 
-    fun length(): Int= foldRight(0){_,x ->x+1 }
+    fun <B> foldLeft(identity: B, f: (B)-> (A)->B): B = foldLeft(identity, this, f)
+
+    fun lengthRight(): Int= foldRight(0){_,x ->x+1 }
 
     internal object Nil : List<Nothing>() {
         override fun isEmpty() = true
@@ -77,6 +78,12 @@ sealed class List<out A> {
                 List.Nil ->identity
                 is List.Cons -> f(list.head, foldRight(list.tail,identity,f))
             }
+
+        tailrec fun <A,B> foldLeft(acc:B, list: List<A>, f:(B)->(A)->B): B =
+            when (list) {
+                List.Nil -> acc
+                is List.Cons -> foldLeft(f(acc)(list.head),list.tail,f)
+            }
     }
 }
 
@@ -110,5 +117,5 @@ fun main() {
     val right_list=List(1,2,3,4,5,6,7,8,9,10)
     println(sumRight(right_list))
     println(productRight(right_list))
-    println(right_list.length())
+    println(right_list.lengthRight())
 }
