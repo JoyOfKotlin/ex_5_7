@@ -33,6 +33,8 @@ sealed class List<out A> {
     fun <B> foldRight(identity : B, f: (A,B)->B): B =
         foldRight(this, identity,f)
 
+    fun length(): Int= foldRight(0){_,x ->x+1 }
+
     internal object Nil : List<Nothing>() {
         override fun isEmpty() = true
         override fun toString(): String = "[NIL]"
@@ -108,5 +110,5 @@ fun main() {
     val right_list=List(1,2,3,4,5,6,7,8,9,10)
     println(sumRight(right_list))
     println(productRight(right_list))
-
+    println(right_list.length())
 }
