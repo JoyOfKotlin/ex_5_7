@@ -125,6 +125,8 @@ fun productLeft(list : List<Int>) : Int = list.foldLeft(1,{x->{y->x*y}})
 
 fun <A> reverseLeft(list : List<A>) : List<A> =list.foldLeft(List.Nil as List<A>,{ acc->{acc.cons(it)}})
 
+fun triple(list:List<Int>): List<Int> = List.foldRight(list,List()){h->{t:List<Int> -> t.cons(h*3)}}
+
 
 fun main() {
     val test_list=List(1,2,3,4,5,6,7,8,9,10)
@@ -151,4 +153,6 @@ fun main() {
     val list2=List(1,2,3)
     val list3=List(1,2,3)
     println(List.flatten(List(list1,list2,list3)))
+    println(triple(test_list))
+
 }
