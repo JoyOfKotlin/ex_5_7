@@ -11,6 +11,7 @@ sealed class List<out A> {
         is Cons -> tail.cons(a)
     }
 
+
     fun drop(n: Int): List<A> {
         tailrec fun drop(n: Int, list: List<A>): List<A> =
             if (n <= 0) list else when (list) {
@@ -25,19 +26,25 @@ sealed class List<out A> {
 
     fun concat(list: List<@UnsafeVariance A>): List<A> = concat(this, list)
 
-    fun reverse (): List<A> =
-        reverse(List.invoke(),this)
+    fun reverse(): List<A> =
+        reverse(List.invoke(), this)
 
-    fun reverseLeft() : List<A> =foldLeft(Nil as List<A>,{acc->{acc.cons(it)}})
+    fun reverseLeft(): List<A> = foldLeft(Nil as List<A>, { acc -> { acc.cons(it) } })
 
     fun init(): List<A> = reverse().drop(1).reverse()
 
-    fun <B> foldRight(identity : B, f: (A)->(B)->B): B =  foldRight(this, identity,f)
+    fun <B> foldRight(identity: B, f: (A) -> (B) -> B): B = foldRight(this, identity, f)
 
-    fun <B> foldLeft(identity: B, f: (B)-> (A)->B): B = foldLeft(identity, this, f)
+    fun <B> foldLeft(identity: B, f: (B) -> (A) -> B): B = foldLeft(identity, this, f)
 
-    fun lengthRight(): Int= foldRight(0){{it+1}}
-    fun lengthLeft(): Int = foldLeft(0,{i->{i+1}})
+    fun <B> map(f: (A) -> B): List<B> = foldLeft(Nil) { acc: List<B> -> { h: A -> Cons(f(h), acc) } }.reverse()
+
+    fun <B> flatMap(f:(A)-> List<B>): List<B> = flatten(map(f))
+
+    fun filter(p: (A) -> Boolean): List<A> = flatMap { a -> if (p(a)) List(a) else Nil }
+
+    fun lengthRight(): Int = foldRight(0) { { it + 1 } }
+    fun lengthLeft(): Int = foldLeft(0, { i -> { i + 1 } })
 
 
     internal object Nil : List<Nothing>() {
@@ -58,6 +65,7 @@ sealed class List<out A> {
     companion object {
         operator fun <A> invoke(vararg az: A): List<A> =
             az.foldRight(Nil as List<A>) { a: A, list: List<A> -> Cons(a, list) }
+
 
         private tailrec fun <A> dropWhile(list: List<A>, p: (A) -> Boolean): List<A> =
             when (list) {
@@ -90,14 +98,17 @@ sealed class List<out A> {
                 is List.Cons -> foldLeft(f(acc)(list.head), list.tail, f)
             }
 
+
         fun <A> concatViaFoldRight(list1: List<A>, list2: List<A>): List<A> =
             foldRight(list1, list2) { x -> { y -> Cons(x, y) } }
 
         fun <A> concatViaFoldLeft(list1: List<A>, list2: List<A>): List<A> =
             list1.reverse().foldLeft(list2) { x -> x::cons }
 
-        fun<A> flatten (list:List<List<A>>): List<A> =
-            list.foldRight(Nil){x->x::concat}
+        fun <A> flatten(list: List<List<A>>): List<A> =
+            list.foldRight(Nil) { x -> x::concat }
+
+
     }
 }
 
@@ -153,6 +164,13 @@ fun main() {
     val list2=List(1,2,3)
     val list3=List(1,2,3)
     println(List.flatten(List(list1,list2,list3)))
-    println(triple(test_list))
 
+    println("\n")
+
+    println(triple(test_list))
+    println(test_list.map({it*3}))
+
+    println("\n")
+
+    println(List(1,2,3).flatMap{i ->List(i,-i) }.filter { it>0 })
 }
