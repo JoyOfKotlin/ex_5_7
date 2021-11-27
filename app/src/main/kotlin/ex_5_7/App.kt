@@ -32,11 +32,11 @@ sealed class List<out A> {
 
     fun init(): List<A> = reverse().drop(1).reverse()
 
-    fun <B> foldRight(identity : B, f: (A,B)->B): B =  foldRight(this, identity,f)
+    fun <B> foldRight(identity : B, f: (A)->(B)->B): B =  foldRight(this, identity,f)
 
     fun <B> foldLeft(identity: B, f: (B)-> (A)->B): B = foldLeft(identity, this, f)
 
-    fun lengthRight(): Int= foldRight(0){_,x ->x+1 }
+    fun lengthRight(): Int= foldRight(0){{it+1}}
     fun lengthLeft(): Int = foldLeft(0,{i->{i+1}})
 
 
@@ -72,28 +72,38 @@ sealed class List<out A> {
             }
 
         private fun <A> reverse(acc: List<A>, list: List<A>): List<A> =
-            when (list){
-                Nil-> acc
-                is Cons -> reverse(acc.cons(list.head),list.tail)
-            }
-
-        fun <A,B>   foldRight(list: List<A>, identity : B, f: (A,B)->B) : B =
             when (list) {
-                List.Nil ->identity
-                is List.Cons -> f(list.head, foldRight(list.tail,identity,f))
+                Nil -> acc
+                is Cons -> reverse(acc.cons(list.head), list.tail)
             }
 
-        tailrec fun <A,B> foldLeft(acc:B, list: List<A>, f:(B)->(A)->B): B =
+        fun <A, B> foldRight(list: List<A>, identity: B, f: (A) -> (B) -> B): B =
+            when (list) {
+                Nil -> identity
+                is Cons -> f(list.head)(foldRight(list.tail, identity, f))
+            }
+
+
+        tailrec fun <A, B> foldLeft(acc: B, list: List<A>, f: (B) -> (A) -> B): B =
             when (list) {
                 List.Nil -> acc
-                is List.Cons -> foldLeft(f(acc)(list.head),list.tail,f)
+                is List.Cons -> foldLeft(f(acc)(list.head), list.tail, f)
             }
+
+        fun <A> concatViaFoldRight(list1: List<A>, list2: List<A>): List<A> =
+            foldRight(list1, list2) { x -> { y -> Cons(x, y) } }
+
+        fun <A> concatViaFoldLeft(list1: List<A>, list2: List<A>): List<A> =
+            list1.reverse().foldLeft(list2) { x -> x::cons }
     }
 }
 
 class App {
-    val greeting: String get() {  return "ex_5_7"     }
+    val greeting: String get() {  return "ex_5_7"    }
 }
+
+
+
 
 fun sum(ints: List<Int>): Int = when (ints) {
     List.Nil -> 0
@@ -104,8 +114,8 @@ fun product (ints: List<Int>) : Int = when (ints) {
     List.Nil -> 1
     is List.Cons -> ints.head * product(ints.tail)
 }
-fun sumRight(list : List<Int>)  : Int = list.foldRight(0,){ x, y -> x + y }
-fun productRight(list : List<Int>)  : Int =  list.foldRight(1,){ x, y -> x * y }
+fun sumRight(list : List<Int>)  : Int = list.foldRight(0,){ x ->{ y -> x + y} }
+fun productRight(list : List<Int>)  : Int =  list.foldRight(1,){ x->{ y -> x * y }}
 
 fun sumLeft(list: List<Int>) : Int =list.foldLeft(0,{x->{y->x+y}})
 fun productLeft(list : List<Int>) : Int = list.foldLeft(1,{x->{y->x*y}})
@@ -132,5 +142,7 @@ fun main() {
 
     println(reverseLeft(test_list))
 
+    println(List.concatViaFoldRight(List(1,2,3,4,5),List(1,2,3,4,5)))
+    println(List.concatViaFoldLeft(List(1,2,3,4,5),List(1,2,3,4,5)))
 
 }
