@@ -35,6 +35,8 @@ sealed class List<out A> {
     fun <B> foldLeft(identity: B, f: (B)-> (A)->B): B = foldLeft(identity, this, f)
 
     fun lengthRight(): Int= foldRight(0){_,x ->x+1 }
+    fun lengthLeft(): Int = foldLeft(0,{i->{i+1}})
+
 
     internal object Nil : List<Nothing>() {
         override fun isEmpty() = true
@@ -100,22 +102,29 @@ fun product (ints: List<Int>) : Int = when (ints) {
     List.Nil -> 1
     is List.Cons -> ints.head * product(ints.tail)
 }
+fun sumRight(list : List<Int>)  : Int = list.foldRight(0,){ x, y -> x + y }
+fun productRight(list : List<Int>)  : Int =  list.foldRight(1,){ x, y -> x * y }
 
+fun sumLeft(list: List<Int>) : Int =list.foldLeft(0,{x->{y->x+y}})
+fun productLeft(list : List<Int>) : Int = list.foldLeft(1,{x->{y->x*y}})
 
-
-fun sumRight(list : List<Int>)  : Int =
-//    foldRight(list,0) { x, y -> x + y }
-    list.foldRight(0,){ x, y -> x + y }
-
-fun productRight(list : List<Int>)  : Int =
-//    foldRight(list,1) { x, y -> x * y }
-    list.foldRight(1,){ x, y -> x * y }
 
 fun main() {
-    println(sum(List(1,2,3,4,5,6,7,8,9,10)))
-    println(product(List(1,2,3,4,5,6,7,8,9,10)))
-    val right_list=List(1,2,3,4,5,6,7,8,9,10)
-    println(sumRight(right_list))
-    println(productRight(right_list))
-    println(right_list.lengthRight())
+    val test_list=List(1,2,3,4,5,6,7,8,9,10)
+
+    println(sum(test_list))
+    println(product(test_list))
+    println("\n")
+
+    println(sumRight(test_list))
+    println(productRight(test_list))
+    println(test_list.lengthRight())
+    println("\n")
+
+    println(sumLeft(test_list))
+    println(productLeft(test_list))
+    println(test_list.lengthLeft())
+    println("\n")
+
+
 }
